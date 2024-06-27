@@ -452,14 +452,14 @@ void MultiRelay::publishHomeAssistantAutodiscovery() {
       json[F("device")][("manufacturer")] = "WLED";
       json[F("device")][("sw_version")] = VERSION;
 
-      sprintf_P(buf, PSTR("%s/relay-%d"), mqttDeviceTopic, i); //max length: 33 + 7 + 3 = 43
+      sprintf_P(buf, PSTR("%s/relay/%d"), mqttDeviceTopic, i); //max length: 33 + 7 + 3 = 43
       json["~"] = buf;
 
       // Publish command topic
       strcat_P(buf, PSTR("/command"));
       mqtt->subscribe(buf, 0);
 
-      json[F("state_topic")]   = F("~/state");
+      json[F("state_topic")]   = "~";
       json[F("command_topic")] = F("~/command");
       json[F("payload_on")]    = "on";
       json[F("payload_off")]   = "off";

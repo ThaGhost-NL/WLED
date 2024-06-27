@@ -476,7 +476,7 @@ void MultiRelay::publishHomeAssistantAutodiscovery() {
       json_str[0]  = 0;
       payload_size = 0;
     }
-    sprintf_P(buf, PSTR("homeassistant/switch/wled/%s/relay-%d/config"), serverDescription, i);
+    sprintf_P(buf, PSTR("homeassistant/switch/wled/%s_relay_%d/config"), serverDescription, i);
     mqtt->publish(buf, 0, true, json_str, payload_size);
   }
 }

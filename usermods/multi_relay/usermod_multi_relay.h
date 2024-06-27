@@ -444,13 +444,9 @@ void MultiRelay::publishHomeAssistantAutodiscovery() {
     if (_relay[i].pin >= 0 && _relay[i].external) {
       StaticJsonDocument<1024> json;
 
-      sprintf_P(buf, PSTR("%s Switch %d"), serverDescription, i); //max length: 33 + 8 + 3 = 44
+      sprintf_P(buf, PSTR("Wled-%s Switch-%d"), serverDescription, i); //max length: 33 + 8 + 3 = 44
       json[F("name")] = buf;
       json[F("uniq_id")] = uid;
-      json[F("device")][("name")] = buf;
-      json[F("device")][("identifiers")] = uid;
-      json[F("device")][("manufacturer")] = "WLED";
-      json[F("device")][("sw_version")] = VERSION;
 
       sprintf_P(buf, PSTR("%s/relay/%d"), mqttDeviceTopic, i); //max length: 33 + 7 + 3 = 43
       json["~"] = buf;
@@ -476,7 +472,7 @@ void MultiRelay::publishHomeAssistantAutodiscovery() {
       json_str[0]  = 0;
       payload_size = 0;
     }
-    sprintf_P(buf, PSTR("homeassistant/switch/wled/%s_relay_%d/config"), serverDescription, i);
+    sprintf_P(buf, PSTR("homeassistant/switch/wled-%s/relay_%d/config"), serverDescription, i);
     mqtt->publish(buf, 0, true, json_str, payload_size);
   }
 }

@@ -439,29 +439,32 @@ void MultiRelay::publishHomeAssistantAutodiscovery() {
   for (int i = 0; i < MULTI_RELAY_MAX_RELAYS; i++) {
     char uid[24], json_str[1024], buf[128];
     size_t payload_size;
-    sprintf_P(uid, PSTR("%s-switch-%d"), serverDescription, i);
+    sprintf_P(uid, PSTR("%s%d"), escapedMac.c_str(), i);
 
     if (_relay[i].pin >= 0 && _relay[i].external) {
       StaticJsonDocument<1024> json;
       sprintf_P(buf, PSTR("%s Switch %d"), serverDescription, i); //max length: 33 + 8 + 3 = 44
       json[F("name")] = buf;
+      json[F("device")][("name")] = buf;
 
       sprintf_P(buf, PSTR("%s/relay/%d"), mqttDeviceTopic, i); //max length: 33 + 7 + 3 = 43
       json["~"] = buf;
       strcat_P(buf, PSTR("/command"));
       mqtt->subscribe(buf, 0);
 
-      json[F("stat_t")]  = "~";
-      json[F("cmd_t")]   = F("~/command");
-      json[F("pl_off")]  = "off";
-      json[F("pl_on")]   = "on";
+      json[F("state_topic")]  = "~";
+      json[F("command_topic")]   = F("~/command");
+      json[F("payload_off")]  = "off";
+      json[F("payload_on")]   = "on";
       json[F("uniq_id")] = uid;
+      json[F("device")][("manufacturer")] = "WLED";
+      json[F("device")][("sw_version")] = VERSION;
 
       strcpy(buf, mqttDeviceTopic); //max length: 33 + 7 = 40
       strcat_P(buf, PSTR("/status"));
-      json[F("avty_t")]       = buf;
-      json[F("pl_avail")]     = F("online");
-      json[F("pl_not_avail")] = F("offline");
+      json[F("availability_topic")] = buf;
+      json[F("payload_available")]     = F("online");
+      json[F("payload_not_available")] = F("offline");
       //TODO: dev
       payload_size = serializeJson(json, json_str);
     } else {

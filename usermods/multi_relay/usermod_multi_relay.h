@@ -439,30 +439,34 @@ void MultiRelay::publishHomeAssistantAutodiscovery() {
   for (int i = 0; i < MULTI_RELAY_MAX_RELAYS; i++) {
     char uid[24], json_str[1024], buf[128];
     size_t payload_size;
-    sprintf_P(uid, PSTR("%s%d"), escapedMac.c_str(), i);
+    sprintf_P(uid, PSTR("%s_%d_"), escapedMac.c_str(), i);
 
     if (_relay[i].pin >= 0 && _relay[i].external) {
       StaticJsonDocument<1024> json;
+
       sprintf_P(buf, PSTR("%s Switch %d"), serverDescription, i); //max length: 33 + 8 + 3 = 44
       json[F("name")] = buf;
-      json[F("device")][("name")] = buf;
-
-      sprintf_P(buf, PSTR("%s/relay/%d"), mqttDeviceTopic, i); //max length: 33 + 7 + 3 = 43
-      json["~"] = buf;
-      strcat_P(buf, PSTR("/command"));
-      mqtt->subscribe(buf, 0);
-
-      json[F("state_topic")]  = "~";
-      json[F("command_topic")]   = F("~/command");
-      json[F("payload_off")]  = "off";
-      json[F("payload_on")]   = "on";
       json[F("uniq_id")] = uid;
+      json[F("device")][("name")] = buf;
+      json[F("device")][("identifiers")] = uid;
       json[F("device")][("manufacturer")] = "WLED";
       json[F("device")][("sw_version")] = VERSION;
 
+      sprintf_P(buf, PSTR("%s/relay/%d"), mqttDeviceTopic, i); //max length: 33 + 7 + 3 = 43
+      json["~"] = buf;
+
+      // Publish command topic
+      strcat_P(buf, PSTR("/command"));
+      mqtt->subscribe(buf, 0);
+
+      json[F("state_topic")]   = F("~/state");
+      json[F("command_topic")] = F("~/command");
+      json[F("payload_on")]    = "on";
+      json[F("payload_off")]   = "off";
+
       strcpy(buf, mqttDeviceTopic); //max length: 33 + 7 = 40
       strcat_P(buf, PSTR("/status"));
-      json[F("availability_topic")] = buf;
+      json[F("availability_topic")]    = buf;
       json[F("payload_available")]     = F("online");
       json[F("payload_not_available")] = F("offline");
       //TODO: dev
@@ -472,7 +476,7 @@ void MultiRelay::publishHomeAssistantAutodiscovery() {
       json_str[0]  = 0;
       payload_size = 0;
     }
-    sprintf_P(buf, PSTR("homeassistant/wled/%s/switch-%d/config"), serverDescription, i);
+    sprintf_P(buf, PSTR("homeassistant/switch/wled/%s/relay-%d/config"), serverDescription, i);
     mqtt->publish(buf, 0, true, json_str, payload_size);
   }
 }

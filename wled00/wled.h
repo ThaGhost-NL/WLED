@@ -55,6 +55,8 @@
 // filesystem specific debugging
 //#define WLED_DEBUG_FS
 
+#define USERMOD_MULTI_RELAY
+
 #ifndef WLED_WATCHDOG_TIMEOUT
   // 3 seconds should be enough to detect a lockup
   // define WLED_WATCHDOG_TIMEOUT=0 to disable watchdog, default
